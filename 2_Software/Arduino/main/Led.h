@@ -25,14 +25,18 @@ private:
   unsigned long durationOffMs = 500;
   unsigned int repetitions;
   bool infinite_blink = true;
+  bool enabled = true; // nur wenn true wird die LED tatsächlich eingeschaltet
 
   bool red = false;
   bool green = false;
   bool blue = false;
 
-  void on();
-  void off();
-  void set(bool const red, bool const green, bool const blue);
+  // LED-Hardware ansteuern
+  void hw_on() const;
+  void hw_off() const;
+  void hw_set(bool const red, bool const green, bool const blue) const;
+  
+  // Zustand ändern
   void switchToState(LEDState const new_state);
   void switchToState(LEDState const new_state, unsigned long const time);
 
@@ -61,6 +65,7 @@ public:
   void set_color_yellow();
   void set_color_blue();
   void set_color_white();
+  void set_enabled(bool const state);
 
   void setup();
   void update();

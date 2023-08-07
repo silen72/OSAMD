@@ -75,7 +75,7 @@ void s72::LED::set_color(bool const red, bool const green, bool const blue){
     case s72::LEDState::start_blinking_on:
     case s72::LEDState::blinking_on:
     {
-      on();
+      hw_on();
     }
   }
 }
@@ -105,15 +105,29 @@ void s72::LED::set_color_white() {
   set_color(true, true, true);
 }
 
-void s72::LED::on(){
-  set(this->red, this->green, this->blue);
+void s72::LED::set_enabled(bool const state) {
+  if (state == this->enabled) return;
+
+  this->enabled = state;
+  if (this->enabled) {
+    hw_on();
+  } else {
+    hw_off();
+  }
+  
 }
 
-void s72::LED::off(){
-  set(false, false, false);
+void s72::LED::hw_on() const {
+  if (this->enabled) {
+    hw_set(this->red, this->green, this->blue);
+  }
 }
 
-void s72::LED::set(bool const red, bool const green, bool const blue) {
+void s72::LED::hw_off() const {
+  hw_set(false, false, false);
+}
+
+void s72::LED::hw_set(bool const red, bool const green, bool const blue) const {
   digitalWrite(this->pinRed, red ? LOW : HIGH);
   digitalWrite(this->pinGreen, green ? LOW : HIGH);
   digitalWrite(this->pinBlue, blue ? LOW : HIGH);
@@ -123,7 +137,7 @@ void s72::LED::setup(){
   pinMode(this->pinRed, OUTPUT);
   pinMode(this->pinGreen, OUTPUT);
   pinMode(this->pinBlue, OUTPUT);
-  off();
+  hw_off();
   Serial.println(F("LED setup done (LED is off)"));
   Serial.print(F("  pins: r "));
   Serial.print(this->pinRed);
@@ -156,7 +170,7 @@ void s72::LED::update(){
   {
     case s72::LEDState::turn_on:
     {
-      on();
+      hw_on();
       next_state = s72::LEDState::on;
       break;
     }
@@ -168,7 +182,7 @@ void s72::LED::update(){
 
     case s72::LEDState::turn_off:
     {
-      off();
+      hw_off();
       next_state = s72::LEDState::off;
       break;
     }
@@ -180,7 +194,7 @@ void s72::LED::update(){
 
     case s72::LEDState::start_blinking_on:
     {
-      on();
+      hw_on();
       next_state = s72::LEDState::blinking_on;
       break;
     }
@@ -195,7 +209,7 @@ void s72::LED::update(){
 
     case s72::LEDState::start_blinking_off:
     {
-      off();
+      hw_off();
       next_state = s72::LEDState::blinking_off;
       break;
     }
